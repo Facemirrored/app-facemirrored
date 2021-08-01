@@ -1,0 +1,13 @@
+{
+  "properties": [
+    {
+      "name": "facemirrored.app.issuer",
+      "type": "java.lang.String",
+      "description": "Description for facemirrored.app.issuer."
+    },
+    {
+      "name": "facemirrored.app.jwtExpirationMs",
+      "type": "java.lang.String",
+      "description": "Description for facemirrored.app.jwtExpirationMs."
+    }
+  ] }
