@@ -1,0 +1,29 @@
+name: Deploy
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v2.1.5
+        with:
+          node-version: 14.17.1
+      - uses: actions/cache@v2.1.6
+        with:
+          path: '**/node_modules'
+          key: ${{ runner.os }}-modules-v2-${{ hashFiles('**/package-lock.lock') }}
+      - uses: actions/setup-java@v2
+        with:
+          distribution: "adopt"
+          java-version: 11
+      - run: mvn -B install --no-transfer-progress --file pom.xml
+      - uses: akhileshns/heroku-deploy@v3.12.12 # This is the action
+        with:
+          heroku_api_key: ${{secrets.HEROKU_API_KEY}}
+          heroku_app_name: "app-facemirrored" #Must be unique in Heroku
+          heroku_email: "herrmann.bjarne@outlook.de"
