@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/public/auth")
 public class AuthController {
 
+  // das ist ein test kommentar
   @PostMapping(path = "/signIn", consumes = "application/json", produces = "application/json")
   public ResponseEntity<SignInResponse> authenticateUser() {
     throw new UnsupportedOperationException("not implemented");
