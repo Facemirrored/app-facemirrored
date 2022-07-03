@@ -32,17 +32,17 @@ public class AuthService {
   public SignInResponse authenticateAndSignInUser(final SignInRequest signInRequest) {
 
     // TODO: authentication exception controlleradvice
-    // authentifiziere User
+    // authenticate user
     final var authentication = authenticationManager.authenticate(
         new UsernamePasswordAuthenticationToken(
             signInRequest.getUsername(),
             signInRequest.getPassword()));
 
-    // speicher authentifizierten User und erstelle JWT-Token
+    // save authenticated user and create jwt-token
     SecurityContextHolder.getContext().setAuthentication(authentication);
     final var jwt = jwtUtils.generateJwtToken(authentication);
 
-    // lade Rollen
+    // load roles
     final var userDetails = (UserDetailsImpl) authentication.getPrincipal();
     final var userRoles = userDetails.getAuthorities().stream()
         .map(GrantedAuthority::getAuthority)
