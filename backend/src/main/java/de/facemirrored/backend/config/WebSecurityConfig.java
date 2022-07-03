@@ -3,6 +3,7 @@ package de.facemirrored.backend.config;
 import de.facemirrored.backend.config.authentication.jwtauth.AuthEntryPointJwt;
 import de.facemirrored.backend.config.authentication.jwtauth.AuthTokenFilter;
 import de.facemirrored.backend.config.authentication.services.UserDetailsServiceImpl;
+import de.facemirrored.backend.database.model.ERole;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -64,22 +65,32 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
   @Override
   protected void configure(HttpSecurity http) throws Exception {
 
-    http.csrf().csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
+    http
+        // wir nutzen ein von Spring Boot verwaltetes Token-Repository für CSRF Security
+        // TODO: 'withHttpOnlyFalse' könnte man weg lassen für mehr Sicherheit,
+        // TODO: da wir wahrscheinlich nicht im FE drauf zugreifen müssen und somit Axios das automatisiert übernhemen lassen
+        .csrf().csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
         .and()
+        // wir nutzen einen eigenen ExceptionHandler für unauthorisierte Zugriffe
         .exceptionHandling().authenticationEntryPoint(unauthorizedHandler)
         .and()
+        // unter der Haube sind wir technisch gesehen stateless unterwegs und verwalten den State selber via JWT-Token
         .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
         .and()
+        // default CORS config mit erlaubten localhost-Zugriff
         .cors().configurationSource(httpServletRequest -> {
           var config = new CorsConfiguration();
           config.addAllowedOrigin("http://localhost:8081");
           return config;
         })
         .and()
-        .authorizeRequests().antMatchers("/api/admin").authenticated()
+        // admin API-Zugriff
+        .authorizeRequests().antMatchers("/api/admin").hasRole(ERole.ADMIN.name())
         .and()
+        // public API-Zugriff
         .authorizeRequests().antMatchers("/api/public").permitAll();
 
+    //
     http.addFilterBefore(
         authenticationJwtTokenFilter(),
         UsernamePasswordAuthenticationFilter.class);

@@ -1,6 +1,8 @@
 package de.facemirrored.backend.config.authentication.jwtauth;
 
 
+import static java.lang.String.format;
+
 import de.facemirrored.backend.config.authentication.springboot.UserDetailsImpl;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
@@ -16,10 +18,19 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
 
+/**
+ * JWT-Util-Klasse für die Unterstützung von Authentifizierungsmethoden mittels JWT-Token, wie unter
+ * anderem die Generierung, Verifizierung und Extrahierung von Daten eines Tokens. Ein Token basiert
+ * zudem auf einem Backend-Privaten Issuer und Secret.
+ */
 @Component
 public class JwtUtils {
 
   private static final Logger logger = LoggerFactory.getLogger(JwtUtils.class);
+  public static final String INVALID_JWT_TOKEN = "Invalid JWT token: {token=%s}";
+  public static final String JWT_TOKEN_IS_EXPIRED = "JWT token is expired: {token=%s}";
+  public static final String JWT_TOKEN_IS_UNSUPPORTED = "JWT token is unsupported: {token=%s}";
+  public static final String JWT_CLAIMS_STRING_IS_EMPTY = "JWT claims string is empty: {token=%s}";
 
   @Value("${facemirrored.app.issuer}")
   private String issuer;
@@ -29,9 +40,17 @@ public class JwtUtils {
   @Value("${facemirrored.app.jwtExpirationMs}")
   private int jwtExpirationMs;
 
-  public String generateJwtToken(Authentication authentication) {
+  /**
+   * Generierung eines JWT-Tokens auf Basis des bereits authentifizierten Users. Dieser ist in
+   * {@link UserDetailsImpl} hinterlegt.
+   *
+   * @param authentication Authentifizierungsmanager-Objekt. In diesem Falle
+   *                       {@link UserDetailsImpl}.
+   * @return JWT-Token als String
+   */
+  public String generateJwtToken(final Authentication authentication) {
 
-    UserDetailsImpl userPrincipal = (UserDetailsImpl) authentication.getPrincipal();
+    final var userPrincipal = (UserDetailsImpl) authentication.getPrincipal();
 
     this.secret = Keys.secretKeyFor(SignatureAlgorithm.HS512);
 
@@ -44,25 +63,54 @@ public class JwtUtils {
         .compact();
   }
 
-  public String getUserNameFromJwtToken(String token) {
-    return Jwts.parserBuilder().setSigningKey(this.secret)
-        .requireIssuer(this.issuer).build().parseClaimsJws(token).getBody()
-        .getSubject();
+  /**
+   * Extrahiert den Usernamen aus einem übergebenen JWT-Token.
+   *
+   * @param token gültiges JWT-Token
+   * @return Username als String
+   */
+  public String getUserNameFromJwtToken(final String token) {
+
+    return Jwts.parserBuilder()
+        .setSigningKey(this.secret)
+        .requireIssuer(this.issuer)
+        .build()
+        .parseClaimsJws(token).getBody().getSubject();
   }
 
+  /**
+   * Validierung eines potentiellen JWT-Tokens. Es wird geprüft, ob das Secret und der Issuer
+   * übereinstimmt. Wenn eins der beiden Eigenschaften nicht gültig ist, so muss davon ausgegangen
+   * werden, dass das Token nicht von diesem Service generiert worden ist.
+   *
+   * @param authToken Token, das validiert werden soll
+   * @return Ob das Token valide ist
+   */
   public boolean validateJwtToken(String authToken) {
     try {
-      Jwts.parserBuilder().setSigningKey(this.secret).requireIssuer(this.issuer)
+
+      Jwts.parserBuilder()
+          .setSigningKey(this.secret)
+          .requireIssuer(this.issuer)
           .build().parseClaimsJws(authToken);
+
       return true;
+
     } catch (MalformedJwtException e) {
-      logger.error("Invalid JWT token: {}", e.getMessage());
+
+      logger.error(format(INVALID_JWT_TOKEN, authToken), e.getMessage());
+
     } catch (ExpiredJwtException e) {
-      logger.error("JWT token is expired: {}", e.getMessage());
+
+      logger.error(format(JWT_TOKEN_IS_EXPIRED, authToken), e.getMessage());
+
     } catch (UnsupportedJwtException e) {
-      logger.error("JWT token is unsupported: {}", e.getMessage());
+
+      logger.error(format(JWT_TOKEN_IS_UNSUPPORTED, authToken), e.getMessage());
+
     } catch (IllegalArgumentException e) {
-      logger.error("JWT claims string is empty: {}", e.getMessage());
+
+      logger.error(format(JWT_CLAIMS_STRING_IS_EMPTY, authToken), e.getMessage());
     }
 
     return false;
