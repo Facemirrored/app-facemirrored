@@ -3,13 +3,11 @@ package de.facemirrored.backend.rest.user;
 import lombok.Builder;
 import lombok.Getter;
 
-@Getter
-@Builder
-public class SignInRequest {
+public record SignInRequest(String username,
+                            String password,
+                            String email) {
 
-  private final String username;
-
-  private final String password;
-
-  private final String email;
+    @Builder
+    public SignInRequest {
+    }
 }

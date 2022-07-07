@@ -35,8 +35,8 @@ public class AuthService {
     // authenticate user
     final var authentication = authenticationManager.authenticate(
         new UsernamePasswordAuthenticationToken(
-            signInRequest.getUsername(),
-            signInRequest.getPassword()));
+            signInRequest.username(),
+            signInRequest.password()));
 
     // save authenticated user and create jwt-token
     SecurityContextHolder.getContext().setAuthentication(authentication);

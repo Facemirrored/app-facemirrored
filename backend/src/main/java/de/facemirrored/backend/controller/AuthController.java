@@ -17,25 +17,24 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/public/auth")
 public class AuthController {
 
-  private final AuthService authService;
+    private final AuthService authService;
 
-  /**
-   * Authentifiziert den User und generiert bei erfolgreicher Authentifizierung ein JWT-Token.
-   *
-   * @return Response-Objekt mit User-Daten (Name / Email / JWT-Token / Rollen)
-   */
-  @PostMapping(path = "/signIn", consumes = "application/json", produces = "application/json")
-  public ResponseEntity<SignInResponse> authenticateAndSignInUser(
-      @RequestBody final SignInRequest signInRequest) {
+    /**
+     * Authenticate user and generate jwt token if successfully authenticate.
+     *
+     * @return Response-object mit user data (name / email / JWT-Token / roles)
+     */
+    @PostMapping(path = "/signIn", consumes = "application/json", produces = "application/json")
+    public ResponseEntity<SignInResponse> authenticateAndSignInUser(
+            @RequestBody final SignInRequest signInRequest) {
 
-    return ResponseEntity.ok(authService.authenticateAndSignInUser(signInRequest));
-  }
+        return ResponseEntity.ok(authService.authenticateAndSignInUser(signInRequest));
+    }
 
+    @PostMapping(value = "/signUp", consumes = "application/json", produces = "application/json")
+    public ResponseEntity<SignUpResponse> signUpUserIfValid(
+            @RequestBody final SignUpRequest signUpRequest) {
 
-  @PostMapping(value = "/signUp", consumes = "application/json", produces = "application/json")
-  public ResponseEntity<SignUpResponse> signUpUserIfValid(
-      @RequestBody final SignUpRequest signUpRequest) {
-
-    throw new UnsupportedOperationException("Not implemented yet");
-  }
+        throw new UnsupportedOperationException("Not implemented yet");
+    }
 }
