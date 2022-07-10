@@ -4,7 +4,7 @@
       class="text-center pt-5"
       style="height: 900px; width: 90%; border: black solid 2px"
     >
-      HOME CONTENT
+      HOME CONTENT WSELFJERILFJERFLIGJERFIGLJILJeg
     </div>
   </div>
 </template>
