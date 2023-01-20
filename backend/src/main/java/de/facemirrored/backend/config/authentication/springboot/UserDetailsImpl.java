@@ -2,6 +2,7 @@ package de.facemirrored.backend.config.authentication.springboot;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import de.facemirrored.backend.database.model.User;
+import java.io.Serial;
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
@@ -17,14 +18,12 @@ import org.springframework.security.core.userdetails.UserDetails;
 @RequiredArgsConstructor
 public class UserDetailsImpl implements UserDetails {
 
+  @Serial
   private static final long serialVersionUID = 3810082059687983326L;
 
   private final Long id;
 
   private final String username;
-
-  private final String email;
-
   @JsonIgnore
   private final String password;
 
@@ -43,10 +42,6 @@ public class UserDetailsImpl implements UserDetails {
   @Override
   public String getUsername() {
     return username;
-  }
-
-  public String getEmail() {
-    return email;
   }
 
   @Override
@@ -74,8 +69,7 @@ public class UserDetailsImpl implements UserDetails {
         .map(role -> new SimpleGrantedAuthority(role.getName().name()))
         .collect(Collectors.toList());
 
-    return new UserDetailsImpl(user.getId(), user.getUsername(), user.getEmail(),
-        user.getPassword(), authorityList);
+    return new UserDetailsImpl(user.getId(), user.getUsername(), user.getPassword(), authorityList);
   }
 
   @Override

@@ -18,6 +18,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
 
+// TODO: deutsche doc in englisch schreiben
 /**
  * JWT-Util-Klasse für die Unterstützung von Authentifizierungsmethoden mittels JWT-Token, wie unter
  * anderem die Generierung, Verifizierung und Extrahierung von Daten eines Tokens. Ein Token basiert
@@ -79,9 +80,9 @@ public class JwtUtils {
   }
 
   /**
-   * Validierung eines potentiellen JWT-Tokens. Es wird geprüft, ob das Secret und der Issuer
-   * übereinstimmt. Wenn eins der beiden Eigenschaften nicht gültig ist, so muss davon ausgegangen
-   * werden, dass das Token nicht von diesem Service generiert worden ist.
+   * Validierung eines JWT-Tokens. Es wird geprüft, ob das Secret und der Issuer übereinstimmt. Wenn
+   * eins der beiden Eigenschaften nicht gültig ist, so muss davon ausgegangen werden, dass das
+   * Token nicht von diesem Service generiert worden ist.
    *
    * @param authToken Token, das validiert werden soll
    * @return Ob das Token valide ist

@@ -1,13 +1,19 @@
 package de.facemirrored.backend.rest.user;
 
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 import lombok.Builder;
 import lombok.Getter;
 
-public record SignInRequest(String username,
-                            String password,
-                            String email) {
+@Getter
+@Builder
+public class SignInRequest {
 
-    @Builder
-    public SignInRequest {
-    }
+  @NotBlank
+  @NotNull
+  private final String username;
+
+  @NotBlank
+  @NotNull
+  private final String password;
 }
