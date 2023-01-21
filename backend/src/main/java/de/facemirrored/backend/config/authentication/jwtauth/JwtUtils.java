@@ -18,11 +18,10 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
 
-// TODO: deutsche doc in englisch schreiben
 /**
- * JWT-Util-Klasse für die Unterstützung von Authentifizierungsmethoden mittels JWT-Token, wie unter
- * anderem die Generierung, Verifizierung und Extrahierung von Daten eines Tokens. Ein Token basiert
- * zudem auf einem Backend-Privaten Issuer und Secret.
+ * Utility class for authentication support via JWT-Token. Including token generation, verification
+ * and extraction from a given token. A JWT-Token is based on the private backend issuer and secret
+ * code.
  */
 @Component
 public class JwtUtils {

@@ -10,10 +10,8 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 /**
- * User-Service-Implementierung, welche sich um das Laden der User-Daten kümmert. Diese werden vom
- * dazugehörigen {@link UserRepository} abgerufen. Klassisch wird eine Implementierung der
- * {@link UserDetails UserDetails-Klasse} zurückgegeben. Hierfür kümmert sich die
- * {@link UserDetailsImpl UserDetailsImpl-Klasse}.
+ * User service implementation, handling loading user data. This data is loaded with the
+ * {@link UserRepository}. An {@link UserDetails} will be returned.
  */
 @Service
 public class UserDetailsServiceImpl implements UserDetailsService {

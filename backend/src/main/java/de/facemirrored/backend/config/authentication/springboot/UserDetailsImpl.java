@@ -13,7 +13,8 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 /**
- *
+ * Implementation from {@link UserDetails}. This class is handling the user data management for
+ * authentication.
  */
 @RequiredArgsConstructor
 public class UserDetailsImpl implements UserDetails {

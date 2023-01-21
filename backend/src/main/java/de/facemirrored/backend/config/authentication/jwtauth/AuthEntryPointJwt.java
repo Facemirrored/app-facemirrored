@@ -10,7 +10,7 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.AuthenticationEntryPoint;
 
 /**
- * Handler for not autorized access. Is managed by
+ * Handler for not authorized access. Is managed by
  * {@link de.facemirrored.backend.config.WebSecurityConfig WebSecurityConfig}.
  */
 @Configuration
