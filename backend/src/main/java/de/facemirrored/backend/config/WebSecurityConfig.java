@@ -4,7 +4,7 @@ import de.facemirrored.backend.config.authentication.jwtauth.AuthEntryPointJwt;
 import de.facemirrored.backend.config.authentication.jwtauth.AuthTokenFilter;
 import de.facemirrored.backend.config.authentication.services.UserDetailsServiceImpl;
 import de.facemirrored.backend.database.model.ERole;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -25,19 +25,11 @@ import org.springframework.web.cors.CorsConfiguration;
 @EnableGlobalMethodSecurity(
     prePostEnabled = true
 )
+@RequiredArgsConstructor
 public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
-  final UserDetailsServiceImpl userDetailsService;
-
+  private final UserDetailsServiceImpl userDetailsService;
   private final AuthEntryPointJwt unauthorizedHandler;
-
-
-  @Autowired
-  public WebSecurityConfig(UserDetailsServiceImpl userDetailsService,
-      AuthEntryPointJwt authEntryPointJwt) {
-    this.userDetailsService = userDetailsService;
-    this.unauthorizedHandler = authEntryPointJwt;
-  }
 
   @Bean
   public AuthTokenFilter authenticationJwtTokenFilter() {
@@ -68,10 +60,10 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     http
         // wir nutzen ein von Spring Boot verwaltetes Token-Repository für CSRF Security
         // TODO: 'withHttpOnlyFalse' könnte man weg lassen für mehr Sicherheit,
-        // TODO: da wir wahrscheinlich nicht im FE drauf zugreifen müssen und somit Axios das automatisiert übernhemen lassen
+        // TODO: da wir wahrscheinlich nicht im FE drauf zugreifen müssen und somit Axios das automatisiert übernehmen lassen
         .csrf().csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
         .and()
-        // wir nutzen einen eigenen ExceptionHandler für unauthorisierte Zugriffe
+        // wir nutzen einen eigenen ExceptionHandler für unautorisierte Zugriffe
         .exceptionHandling().authenticationEntryPoint(unauthorizedHandler)
         .and()
         // unter der Haube sind wir technisch gesehen stateless unterwegs und verwalten den State selber via JWT-Token
@@ -88,11 +80,11 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
         .authorizeRequests().antMatchers("/api/admin").hasRole(ERole.ADMIN.name())
         .and()
         // public API-Zugriff
-        .authorizeRequests().antMatchers("/api/public").permitAll();
-
-    //
-    http.addFilterBefore(
-        authenticationJwtTokenFilter(),
-        UsernamePasswordAuthenticationFilter.class);
+        .authorizeRequests().antMatchers("/api/public").permitAll()
+        .and()
+        // Autorisierung-Filter für Requests setzen
+        .addFilterBefore(
+            authenticationJwtTokenFilter(),
+            UsernamePasswordAuthenticationFilter.class);
   }
 }

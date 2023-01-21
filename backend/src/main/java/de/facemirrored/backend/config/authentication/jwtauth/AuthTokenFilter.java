@@ -1,6 +1,13 @@
 package de.facemirrored.backend.config.authentication.jwtauth;
 
+import static java.util.Objects.nonNull;
+
 import de.facemirrored.backend.config.authentication.services.UserDetailsServiceImpl;
+import java.io.IOException;
+import javax.servlet.FilterChain;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.lang.NonNull;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -9,84 +16,76 @@ import org.springframework.security.web.authentication.WebAuthenticationDetailsS
 import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 
-import javax.servlet.FilterChain;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
-
 /**
- * Filter-Klasse, welche bei jedem Request prozessiert wird. Dabei wird vom Request
+ * Filter-Class processed by every request. Handles JWT-Authentication- and User-Authorization.
  */
 public class AuthTokenFilter extends OncePerRequestFilter {
 
-    @Autowired
-    private JwtUtils jwtUtils;
+  private static final String JWT_TOKEN_WARN = "JWT-Token in request is invalid. [request-uri = %s; jwt-token = %s]";
 
-    @Autowired
-    private UserDetailsServiceImpl userDetailsService;
+  @Autowired
+  private JwtUtils jwtUtils;
 
-    /**
-     * Authenticate and validate user, if contained. User name will be extracted from given jwt-token and be searched in user-repository.
-     * Found user contains more details like e-mail / encoded password and roles.
-     * This information will be set as current authentication object managed by spring boot.
-     *
-     * @param request     Request-object
-     * @param response    Response-object
-     * @param filterChain Filter-Chain-object
-     * @throws ServletException Servlet-Exception-object
-     * @throws IOException      IOException-objekt
-     */
-    @Override
-    protected void doFilterInternal(
-            @NonNull HttpServletRequest request,
-            @NonNull HttpServletResponse response,
-            @NonNull FilterChain filterChain) throws ServletException, IOException {
+  @Autowired
+  private UserDetailsServiceImpl userDetailsService;
 
-        String jwt = parseJwt(request);
+  /**
+   * Authenticate user, if contained. Username will be extracted from given JWT-Token and be
+   * searched in DB via
+   * {@link de.facemirrored.backend.database.repository.UserRepository UserRepository}. Found user
+   * containes more specific information like roles for authorization. Given information will be set
+   * in the Spring Boot
+   * {@link org.springframework.security.core.Authentication Authentication Object}.
+   *
+   * @param request     Request-Objekt
+   * @param response    Response-Objekt
+   * @param filterChain Filter-Chain-Objekt
+   * @throws ServletException Servlet-Exception-Objekt
+   * @throws IOException      IOException-Objekt
+   */
+  @Override
+  protected void doFilterInternal(
+      @NonNull HttpServletRequest request,
+      @NonNull HttpServletResponse response,
+      @NonNull FilterChain filterChain) throws ServletException, IOException {
 
-        if (jwt != null && jwtUtils.validateJwtToken(jwt)) {
+    final var jwt = parseJwt(request);
 
-            // extract username from jwt token
-            final var username = jwtUtils.getUserNameFromJwtToken(jwt);
-            // suche user im repo
-            final var userDetails = userDetailsService.loadUserByUsername(username);
+    if (nonNull(jwt) && jwtUtils.validateJwtToken(jwt)) {
 
-            // create authentication-object based on found user
-            final var authentication = new UsernamePasswordAuthenticationToken(
-                    userDetails,
-                    null,
-                    userDetails.getAuthorities());
+      final var username = jwtUtils.getUserNameFromJwtToken(jwt);
+      final var userDetails = userDetailsService.loadUserByUsername(username);
+      final var authentication = new UsernamePasswordAuthenticationToken(
+          userDetails,
+          null,
+          userDetails.getAuthorities());
 
-            // set request details
-            authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+      authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+      SecurityContextHolder.getContext().setAuthentication(authentication);
 
-            // save authentication-object
-            SecurityContextHolder.getContext().setAuthentication(authentication);
+    } else {
 
-        } else {
-
-            logger.warn("Request: " + request.getRequestURI() + ":::JWT token null or invalid: " + jwt);
-        }
-
-        filterChain.doFilter(request, response);
+      logger.warn(String.format(JWT_TOKEN_WARN, request.getRequestURI(), jwt));
     }
 
-    /**
-     * Extract token from authorization-header if contained and valid.
-     *
-     * @param request Request-object
-     * @return Token-Code as string. Null if not valid / contained
-     */
-    private String parseJwt(HttpServletRequest request) {
+    filterChain.doFilter(request, response);
+  }
 
-        final var headerAuth = request.getHeader("Authorization");
+  /**
+   * Extracting the JWT-Token from the authorization header, if contained and valid.
+   *
+   * @param request Request-Object
+   * @return JWT-Token as String. Null if not contained or invalid.
+   */
+  private String parseJwt(HttpServletRequest request) {
 
-        if (StringUtils.hasText(headerAuth) && headerAuth.startsWith("Bearer ")) {
+    final var headerAuth = request.getHeader("Authorization");
 
-            return headerAuth.substring(7);
-        }
+    if (StringUtils.hasText(headerAuth) && headerAuth.startsWith("Bearer ")) {
 
-        return null;
+      return headerAuth.substring(7);
     }
+
+    return null;
+  }
 }

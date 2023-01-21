@@ -1,15 +1,14 @@
 package de.facemirrored.backend.rest.user;
 
 import java.util.List;
-
 import lombok.Builder;
 
-public record SignInResponse(String token,
-                             String username,
-                             String email,
-                             List<String> roleList) {
+@Builder
+public class SignInResponse {
 
-    @Builder
-    public SignInResponse {
-    }
+  private final String token;
+
+  private final String username;
+
+  private final List<String> roleList;
 }
